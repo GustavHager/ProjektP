@@ -3,7 +3,6 @@
 
 #include "loadobj.h"
 #include "VectorUtils2.h"
-#include "loadobj.h"
 
 typedef struct objectData{
     Model *m;
