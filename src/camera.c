@@ -2,7 +2,7 @@
 
 void timer(int i)
 {
-		updateBall();
+    updateBall();
 
     VectorSub(&l,&p,&viewDirection);
     Normalize(&viewDirection);
@@ -19,9 +19,6 @@ void timer(int i)
 
 
     if(keyIsDown('w')){
-        //p.z = p.z - 0.5;
-        //l.z = l.z - 0.5;
-
         VectorAdd(&p,&viewDirection,&p);
         VectorAdd(&l,&viewDirection,&l);
     }
@@ -68,10 +65,6 @@ void timer(int i)
 
     GLfloat h = getHeightInPoint(p.x,p.z);
 
-    //printf("x: %f  ",p.x);
-    //printf("z: %f  ",p.z);
-    //printf("h: %f \n", h);
-
     p.y = yOffset + h;
     l.y = yOffset + h;
 
@@ -109,15 +102,14 @@ void display(void){
 	glUseProgram(program);
 
 	// Build matrix
-
 	lookAt(&p,&l,0, 1, 0,camMatrix);
 
 	IdentityMatrix(modelView);
 	Mult(camMatrix, modelView, total);
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-    glUniformMatrix4fv(glGetUniformLocation(program, "lookAtMatrix"), 1, GL_TRUE, camMatrix);
-    glActiveTexture(GL_TEXTURE0);
+        glUniformMatrix4fv(glGetUniformLocation(program, "lookAtMatrix"), 1, GL_TRUE, camMatrix);
+        glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex1);		// Bind Our Texture tex1
 	DrawModel(tm, program, "inPosition", "inNormal", "inTexCoord");
 
@@ -153,18 +145,18 @@ void init(void){
 	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 500.0, projectionMatrix);
 
 	// Load and compile shader
-	program = loadShaders("terrain.vert", "terrain.frag");
+	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
 	glUseProgram(program);
 	printError("init shader");
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUniform1i(glGetUniformLocation(program, "tex"), 0); // Texture unit 0
-	LoadTGATextureSimple("dirt.tga", &tex1);
+	LoadTGATextureSimple("res/dirt.tga", &tex1);
 
 
 // Load terrain data
 
-	LoadTGATexture("TERRA2.tga", &ttex);
+	LoadTGATexture("res/TERRA2.tga", &ttex);
 	tm = GenerateTerrain(&ttex);
 	printError("init terrain");
 

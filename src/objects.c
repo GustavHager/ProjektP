@@ -3,12 +3,12 @@
 objectData loadBalls(){
 
     //load shader
-    GLuint ballShader = loadShaders("ball.vert", "ball.frag");
+    GLuint ballShader = loadShaders("shaders/ball.vert", "shaders/ball.frag");
     GLuint ballTexture;
 
     glUseProgram(ballShader);
-    LoadTGATextureSimple("f3.tga",&ballTexture);
-    ball = loadObjectWithMore("groundsphere.obj",ballShader,ballTexture);
+    LoadTGATextureSimple("res/f3.tga",&ballTexture);
+    ball = loadObjectWithMore("res/groundsphere.obj",ballShader,ballTexture);
     //glUniformMatrix4fv(glGetUniformLocation(ball.shaderProgram, "projMatrix"), 1, GL_TRUE, projectionMatrix);
     printError("ballsproblem.");
 }

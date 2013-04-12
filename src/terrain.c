@@ -34,9 +34,7 @@ if ((x <= worldWidth) && (z <= worldHeight) && (z >= 0) && (x >= 0)){
     corners[3].y = vertexArray[(topX + bottomZ * worldWidth)*3+1];
     corners[3].z = vertexArray[(topX + bottomZ * worldWidth)*3+2];
 
-    //printf("first corner in:(%f,%f,%f)\n",corners[0].x,corners[0].y,corners[0].z);
 	}else{
-	    //printf("worldX: %i, worldZ: %i, you outside!\n",worldHeight,worldWidth);
 
 	    int i=0;
         for(i=0; i < 4; i++){
@@ -67,7 +65,6 @@ GLfloat getHeightInPoint(GLfloat x,GLfloat z){
         height = (quadCorners[0].y + quadCorners[3].y + quadCorners[2].y) / 3;
     }
 
-    //free(quadCorners);
     return height;
 }
 
