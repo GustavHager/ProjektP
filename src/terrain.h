@@ -3,6 +3,7 @@
 
 #include <GL/gl.h>
 #include <math.h>
+#include <time.h>
 #include "libs/VectorUtils2.h"
 #include "libs/GL_utilities.h"
 #include "libs/loadobj.h"
@@ -15,5 +16,7 @@ int worldHeight;
 Point3D* getQuad(GLfloat x, GLfloat z);
 GLfloat getHeightInPoint(GLfloat x,GLfloat z);
 Model* GenerateTerrain(TextureData *tex);
+
+GLfloat generate_world(int x, int z);
 
 #endif
