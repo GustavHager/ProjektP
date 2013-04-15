@@ -67,14 +67,46 @@ GLfloat getHeightInPoint(GLfloat x,GLfloat z){
 
     return height;
 }
+/*
+http://stackoverflow.com/questions/2509679/how-to-generate-a-random-number-from-within-a-range-c
+*/
+int random_in_range (unsigned int min, unsigned int max){
+
+  int base_random = rand(); /* in [0, RAND_MAX] */
+  if (RAND_MAX == base_random) return random_in_range(min, max);
+  /* now guaranteed to be in [0, RAND_MAX) */
+  int range       = max - min,
+      remainder   = RAND_MAX % range,
+      bucket      = RAND_MAX / range;
+  /* There are range buckets, plus one smaller interval
+     within remainder of RAND_MAX */
+  if (base_random < RAND_MAX - remainder) {
+    return min + base_random/bucket;
+  } else {
+    return random_in_range (min, max);
+  }
+}
+
+GLfloat generate_world(int x,int z){
+	
+	GLfloat height = random_in_range(0,2);
+	
+	return height;
+}
 
 Model* GenerateTerrain(TextureData *tex){
+
+	tex->width = tex->width * 16;
+	tex->height = tex->height * 16;
 
 	int vertexCount = tex->width * tex->height;
 	int triangleCount = (tex->width-1) * (tex->height-1) * 2;
 	int x, z;
 	worldWidth = tex->width;
 	worldHeight = tex->height;
+
+	srand(1124132);
+	
 
 	vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
 	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
@@ -89,7 +121,7 @@ Model* GenerateTerrain(TextureData *tex){
 		{
 // Vertex array. You need to scale this properly
 			vertexArray[(x + z * tex->width)*3 + 0] = x / 1.0;
-			vertexArray[(x + z * tex->width)*3 + 1] = tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 10.0;
+			vertexArray[(x + z * tex->width)*3 + 1] = generate_world(x,z);
 			vertexArray[(x + z * tex->width)*3 + 2] = z / 1.0;
 // Normal vectors. You need to calculate these.
 
