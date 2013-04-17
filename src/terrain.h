@@ -13,10 +13,15 @@ GLfloat *vertexArray;
 int worldWidth;
 int worldHeight;
 
+GLfloat* heightmap;
+
 Point3D* getQuad(GLfloat x, GLfloat z);
 GLfloat getHeightInPoint(GLfloat x,GLfloat z);
 Model* GenerateTerrain(TextureData *tex);
 
-GLfloat generate_world(int x, int z);
+void generate_world(int width, int height);
+void initWorldgen(int width, int height);
+GLfloat get_height(int x, int z, int width, int height);
+void displace_terrain(int width, int height);
 
 #endif

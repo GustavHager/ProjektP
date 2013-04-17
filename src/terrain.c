@@ -87,17 +87,66 @@ int random_in_range (unsigned int min, unsigned int max){
   }
 }
 
-GLfloat generate_world(int x,int z){
+
+void initWorldgen(int width, int height){
+	heightmap = malloc(sizeof(GLfloat)*width*height);
+	int x, z;
+	for(x=0; x < width; x++){
+	  for(z=0; z < height; z++){
+              heightmap[x*width+z] = 0;
+	   }
+	}
+}
+
+
+void generate_world(int width, int height){
+#define NUM_ITERS 150
+  
+  initWorldgen(width,height);
+  int i;
+  for(i=0; i < NUM_ITERS; i++){
+    displace_terrain(width,height);
+  }
+}
+
+GLfloat get_height(int x, int z, int width, int height){
+   if(x < width && z < height){
+      printf("now at: %f \n",heightmap[x*width + z]);
+      return heightmap[x*width + z];
+   }else{
+      printf("invalid coordinate for worldgen, fuck you!\n");
+      return -100000000;
+   }
+}
+
+void displace_terrain(int width, int height){
 	
-	GLfloat height = random_in_range(0,2);
-	
-	return height;
+		
+	float v = rand();
+	float a = sin(v);
+	float b = cos(v);
+	float d = sqrt(pow(width,2) + pow(height,2));
+	// rand() / RAND_MAX gives a random number between 0 and 1.
+	// therefore c will be a random number between -d/2 and d/2
+	float c = (rand() / RAND_MAX) * d - d/2;
+	float displacement = 0.5;
+	int x,z;
+
+	for(x=0; x < width; x++){
+	  for(z=0; z < height; z++){
+	    if(a*x + b*z - c > 0){
+	      heightmap[x*width+z] = heightmap[x*width+z] + displacement; 
+	    }else{
+              heightmap[x*width+z] = heightmap[x*width+z] - displacement;
+            }
+	  }
+	}
 }
 
 Model* GenerateTerrain(TextureData *tex){
 
-	tex->width = tex->width * 16;
-	tex->height = tex->height * 16;
+	tex->width = tex->width * 1;
+	tex->height = tex->height * 1;
 
 	int vertexCount = tex->width * tex->height;
 	int triangleCount = (tex->width-1) * (tex->height-1) * 2;
@@ -114,6 +163,8 @@ Model* GenerateTerrain(TextureData *tex){
 	GLuint *indexArray = malloc(sizeof(GLuint) * triangleCount*3);
 
 	GLfloat Xcoord,Ycoord,Zcoord,X2coord,Y2coord,Z2coord,X3coord,Y3coord,Z3coord;
+	
+	generate_world(worldWidth,worldHeight);
 
 	printf("bpp %d\n", tex->bpp);
 	for (x = 0; x < tex->width; x++)
@@ -121,7 +172,7 @@ Model* GenerateTerrain(TextureData *tex){
 		{
 // Vertex array. You need to scale this properly
 			vertexArray[(x + z * tex->width)*3 + 0] = x / 1.0;
-			vertexArray[(x + z * tex->width)*3 + 1] = generate_world(x,z);
+			vertexArray[(x + z * tex->width)*3 + 1] = get_height(x,z,worldWidth,worldHeight);
 			vertexArray[(x + z * tex->width)*3 + 2] = z / 1.0;
 // Normal vectors. You need to calculate these.
 

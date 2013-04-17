@@ -107,6 +107,7 @@ void display(void){
 	IdentityMatrix(modelView);
 	Mult(camMatrix, modelView, total);
 
+	
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
         glUniformMatrix4fv(glGetUniformLocation(program, "lookAtMatrix"), 1, GL_TRUE, camMatrix);
         glActiveTexture(GL_TEXTURE0);
