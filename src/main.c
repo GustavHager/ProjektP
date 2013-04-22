@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 	glutInitWindowSize (windowWidth, windowHight);
 	glutCreateWindow ("TSBK07 Lab 4");
 	glutDisplayFunc(display);
-	init ();
+	init();
 	initKeymapManager();
 	glutTimerFunc(20, &timer, 0);
 

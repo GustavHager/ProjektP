@@ -9,9 +9,5 @@
 #include "libs/LoadTGA2.h"
 #include "libs/objectHandler.h"
 
-objectData ball;
-
-objectData loadBalls();
-void updateBall();
 
 #endif

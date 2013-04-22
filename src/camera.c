@@ -2,7 +2,6 @@
 
 void timer(int i)
 {
-    updateBall();
 
     VectorSub(&l,&p,&viewDirection);
     Normalize(&viewDirection);
@@ -45,23 +44,7 @@ void timer(int i)
        yOffset = yOffset+0.2;
     }
 
-    if(keyIsDown('h')){
-        ball.x = ball.x + 0.1;
-    }
 
-    if(keyIsDown('j')){
-        ball.z = ball.z + 0.1;
-    }
-
-    if(keyIsDown('k')){
-        ball.x = ball.x - 0.1;
-    }
-
-    if(keyIsDown('l')){
-        ball.z = ball.z - 0.1;
-    }
-
-    ball.y = getHeightInPoint(ball.x,ball.z);
 
     GLfloat h = getHeightInPoint(p.x,p.z);
 
@@ -96,10 +79,7 @@ void display(void){
 
 	GLfloat total[16], modelView[16], camMatrix[16], transMatrix[16], newTotal[16];
 
-
 	printError("pre display");
-
-	glUseProgram(program);
 
 	// Build matrix
 	lookAt(&p,&l,0, 1, 0,camMatrix);
@@ -109,29 +89,15 @@ void display(void){
 
 	
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        glUniformMatrix4fv(glGetUniformLocation(program, "lookAtMatrix"), 1, GL_TRUE, camMatrix);
-        glActiveTexture(GL_TEXTURE0);
+  	glUniformMatrix4fv(glGetUniformLocation(program, "lookAtMatrix"), 1, GL_TRUE, camMatrix);
+  	
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex1);		// Bind Our Texture tex1
+	
+	
 	DrawModel(tm, program, "inPosition", "inNormal", "inTexCoord");
+	printError("display 4");
 
-	printError("display 2");
-
-    glUseProgram(ball.shaderProgram);
-    //upload matrices to the balls shader
-    glUniformMatrix4fv(glGetUniformLocation(ball.shaderProgram, "lookAtMatrix"), 1, GL_TRUE, camMatrix);
-    glUniformMatrix4fv(glGetUniformLocation(ball.shaderProgram, "projMatrix"), 1, GL_TRUE, projectionMatrix);
-
-    ball.shaderProgram = program;
-
-    //compute new modulating matrix
-    //translation matrix
-    T(ball.x,ball.y,ball.z,&transMatrix);
-    Mult(total,transMatrix,&newTotal);
-
-    glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, newTotal);
-
-    //draw the ball
-    drawObject(&ball);
 
 	glutSwapBuffers();
 }
@@ -143,7 +109,7 @@ void init(void){
 	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
-	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 500.0, projectionMatrix);
+	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 5000.0, projectionMatrix);
 
 	// Load and compile shader
 	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
@@ -155,11 +121,10 @@ void init(void){
 	LoadTGATextureSimple("res/dirt.tga", &tex1);
 
 
-// Load terrain data
+	//Load terrain data
 
 	LoadTGATexture("res/TERRA2.tga", &ttex);
-	tm = GenerateTerrain(&ttex);
+	tm = GenerateTerrain();
 	printError("init terrain");
 
-	loadBalls();
 }
