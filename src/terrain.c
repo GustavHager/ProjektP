@@ -70,7 +70,7 @@ GLfloat getHeightInPoint(GLfloat x,GLfloat z){
 /*
 http://stackoverflow.com/questions/2509679/how-to-generate-a-random-number-from-within-a-range-c
 */
-int random_in_range (unsigned int min, unsigned int max){
+int random_in_range(unsigned int min, unsigned int max){
 
   int base_random = rand(); /* in [0, RAND_MAX] */
   if (RAND_MAX == base_random) return random_in_range(min, max);
@@ -111,7 +111,7 @@ void generate_world(int width, int height){
 
 GLfloat get_height(int x, int z, int width, int height){
    if(x < width && z < height){
-      printf("now at: %f \n",heightmap[x*width + z]);
+      //printf("now at: %f \n",heightmap[x*width + z]);
       return heightmap[x*width + z];
    }else{
       printf("invalid coordinate for worldgen, fuck you!\n");
@@ -122,24 +122,26 @@ GLfloat get_height(int x, int z, int width, int height){
 void displace_terrain(int width, int height){
 	
 		
-	float v = rand();
-	float a = sin(v);
-	float b = cos(v);
-	float d = sqrt(pow(width,2) + pow(height,2));
+	double v = rand();
+	double b = sin(v);
+	double a = cos(v);
+	double d = sqrt(pow(width,2) + pow(height,2));
 	// rand() / RAND_MAX gives a random number between 0 and 1.
 	// therefore c will be a random number between -d/2 and d/2
-	float c = (rand() / RAND_MAX) * d - d/2;
-	float displacement = 0.5;
+	double c_random = ((double)rand() / (double)RAND_MAX);
+	double c = c_random * d - d/2;
+	printf("c_r is: %f \n",c_random);
+	double displacement = 0.1;
 	int x,z;
 
 	for(x=0; x < width; x++){
-	  for(z=0; z < height; z++){
-	    if(a*x + b*z - c > 0){
-	      heightmap[x*width+z] = heightmap[x*width+z] + displacement; 
-	    }else{
-              heightmap[x*width+z] = heightmap[x*width+z] - displacement;
-            }
-	  }
+		for(z=0; z < height; z++){
+			if(a*x + b*z - c > 0){
+				heightmap[x*width+z] = heightmap[x*width+z] + displacement; 
+			}else{
+				heightmap[x*width+z] = heightmap[x*width+z] - displacement;
+			}
+		}
 	}
 }
 
