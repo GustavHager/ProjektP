@@ -46,10 +46,10 @@ void timer(int i)
 
 
 
-    GLfloat h = getHeightInPoint(p.x,p.z);
+    //GLfloat h = getHeightInPoint(p.x,p.z);
 
-    p.y = yOffset + h;
-    l.y = yOffset + h;
+    p.y = yOffset;
+    l.y = yOffset;
 
 
     if(keyIsDown('z')){
@@ -85,11 +85,9 @@ void display(void){
 	lookAt(&p,&l,0, 1, 0,camMatrix);
 
 	IdentityMatrix(modelView);
-	Mult(camMatrix, modelView, total);
 
-	
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-  	glUniformMatrix4fv(glGetUniformLocation(program, "lookAtMatrix"), 1, GL_TRUE, camMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, modelView);
+  glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, camMatrix);
   	
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex1);		// Bind Our Texture tex1
@@ -106,10 +104,10 @@ void init(void){
 	// GL inits
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	printError("GL inits");
 
-	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 5000.0, projectionMatrix);
+	frustum(-0.1, 0.1, -0.1, 0.1, 0.1, 1000.0, projectionMatrix);
 
 	// Load and compile shader
 	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
