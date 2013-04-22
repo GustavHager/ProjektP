@@ -88,6 +88,7 @@ void display(void){
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, modelView);
   glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, camMatrix);
+
   	
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex1);		// Bind Our Texture tex1
@@ -108,6 +109,7 @@ void init(void){
 	printError("GL inits");
 
 	frustum(-0.1, 0.1, -0.1, 0.1, 0.1, 1000.0, projectionMatrix);
+
 
 	// Load and compile shader
 	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
