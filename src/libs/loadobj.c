@@ -850,8 +850,8 @@ void CenterModel(Model *m)
 
 void DrawModel(Model *m, GLuint program, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName)
 {
-	if (m != NULL)
-	{
+
+	if (m != NULL){
 		glBindVertexArray(m->vao);	// Select VAO
 
 		glBindBuffer(GL_ARRAY_BUFFER, m->vb);
@@ -862,7 +862,7 @@ void DrawModel(Model *m, GLuint program, char* vertexVariableName, char* normalV
 			glVertexAttribPointer(glGetAttribLocation(program, normalVariableName), 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(glGetAttribLocation(program, normalVariableName));
 		}
-	
+
 		// VBO for texture coordinate data NEW for 5b
 		if ((m->texCoordArray != NULL)&&(texCoordVariableName != NULL))
 		{
