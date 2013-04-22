@@ -130,7 +130,6 @@ void displace_terrain(int width, int height){
 	// therefore c will be a random number between -d/2 and d/2
 	double c_random = ((double)rand() / (double)RAND_MAX);
 	double c = c_random * d - d/2;
-	printf("c_r is: %f \n",c_random);
 	double displacement = 0.1;
 	int x,z;
 
@@ -145,16 +144,15 @@ void displace_terrain(int width, int height){
 	}
 }
 
-Model* GenerateTerrain(TextureData *tex){
+Model* GenerateTerrain(){
 
-	tex->width = tex->width * 1;
-	tex->height = tex->height * 1;
+	worldWidth = 255;
+	worldHeight = 255;
 
-	int vertexCount = tex->width * tex->height;
-	int triangleCount = (tex->width-1) * (tex->height-1) * 2;
+
+	int vertexCount = worldWidth * worldHeight;
+	int triangleCount = (worldWidth-1) * (worldHeight-1) * 2;
 	int x, z;
-	worldWidth = tex->width;
-	worldHeight = tex->height;
 
 	srand(1124132);
 	
@@ -168,28 +166,27 @@ Model* GenerateTerrain(TextureData *tex){
 	
 	generate_world(worldWidth,worldHeight);
 
-	printf("bpp %d\n", tex->bpp);
-	for (x = 0; x < tex->width; x++)
-		for (z = 0; z < tex->height; z++)
+	for (x = 0; x < worldWidth; x++)
+		for (z = 0; z < worldHeight; z++)
 		{
 // Vertex array. You need to scale this properly
-			vertexArray[(x + z * tex->width)*3 + 0] = x / 1.0;
-			vertexArray[(x + z * tex->width)*3 + 1] = get_height(x,z,worldWidth,worldHeight);
-			vertexArray[(x + z * tex->width)*3 + 2] = z / 1.0;
+			vertexArray[(x + z * worldWidth)*3 + 0] = x / 1.0;
+			vertexArray[(x + z * worldWidth)*3 + 1] = get_height(x,z,worldWidth,worldHeight);
+			vertexArray[(x + z * worldWidth)*3 + 2] = z / 1.0;
 // Normal vectors. You need to calculate these.
 
             if(x > 0 && z > 0) {
-                Xcoord = vertexArray[(x + z * tex->width)*3 + 0];
-                Ycoord = vertexArray[(x + z * tex->width)*3 + 1];
-                Zcoord = vertexArray[(x + z * tex->width)*3 + 2];
+                Xcoord = vertexArray[(x + z * worldWidth)*3 + 0];
+                Ycoord = vertexArray[(x + z * worldWidth)*3 + 1];
+                Zcoord = vertexArray[(x + z * worldWidth)*3 + 2];
 
-                X2coord = vertexArray[((x - 1)+ z * tex->width)*3 + 0];
-                Y2coord = vertexArray[((x - 1)+ z * tex->width)*3 + 1];
-                Z2coord = vertexArray[((x - 1)+ z * tex->width)*3 + 2];
+                X2coord = vertexArray[((x - 1)+ z * worldWidth)*3 + 0];
+                Y2coord = vertexArray[((x - 1)+ z * worldWidth)*3 + 1];
+                Z2coord = vertexArray[((x - 1)+ z * worldWidth)*3 + 2];
 
-                X3coord = vertexArray[((x + 1)+ z * tex->width)*3 + 0];
-                Y3coord = vertexArray[((x + 1)+ z * tex->width)*3 + 1];
-                Z3coord = vertexArray[((x + 1)+ z * tex->width)*3 + 2];
+                X3coord = vertexArray[((x + 1)+ z * worldWidth)*3 + 0];
+                Y3coord = vertexArray[((x + 1)+ z * worldWidth)*3 + 1];
+                Z3coord = vertexArray[((x + 1)+ z * worldWidth)*3 + 2];
 
                 Point3D v1 = {.x=Xcoord - X2coord, .y=Ycoord - Y2coord, .z=Zcoord - Z2coord};
                 Point3D v2 = {.x=X2coord - X3coord, .y=Y2coord - Y3coord, .z=Z2coord - Z3coord};
@@ -197,32 +194,32 @@ Model* GenerateTerrain(TextureData *tex){
 
                 CrossProduct(&v2,&v1,&normalVector);
 
-                normalArray[(x + z * tex->width)*3 + 0] = normalVector.x;
-                normalArray[(x + z * tex->width)*3 + 1] = normalVector.y;
-                normalArray[(x + z * tex->width)*3 + 2] = normalVector.z;
+                normalArray[(x + z * worldWidth)*3 + 0] = normalVector.x;
+                normalArray[(x + z * worldWidth)*3 + 1] = normalVector.y;
+                normalArray[(x + z * worldWidth)*3 + 2] = normalVector.z;
 
             }else{
-                normalArray[(x + z * tex->width)*3 + 0] = 0.0;
-                normalArray[(x + z * tex->width)*3 + 1] = 1.0;
-                normalArray[(x + z * tex->width)*3 + 2] = 0.0;
+                normalArray[(x + z * worldWidth)*3 + 0] = 0.0;
+                normalArray[(x + z * worldWidth)*3 + 1] = 1.0;
+                normalArray[(x + z * worldWidth)*3 + 2] = 0.0;
             }
 
 // Texture coordinates. You may want to scale them.
-			texCoordArray[(x + z * tex->width)*2 + 0] =  (float)x / tex->width;
-			texCoordArray[(x + z * tex->width)*2 + 1] =  (float)z / tex->height;
+			texCoordArray[(x + z * worldWidth)*2 + 0] =  (float)x / worldWidth;
+			texCoordArray[(x + z * worldWidth)*2 + 1] =  (float)z / worldHeight;
 		}
 
-	for (x = 0; x < tex->width-1; x++)
-		for (z = 0; z < tex->height-1; z++)
+	for (x = 0; x < worldWidth-1; x++)
+		for (z = 0; z < worldHeight-1; z++)
 		{
 		// Triangle 1
-			indexArray[(x + z * (tex->width-1))*6 + 0] = x + z * tex->width;
-			indexArray[(x + z * (tex->width-1))*6 + 1] = x + (z+1) * tex->width;
-			indexArray[(x + z * (tex->width-1))*6 + 2] = x+1 + z * tex->width;
+			indexArray[(x + z * (worldWidth-1))*6 + 0] = x + z * worldWidth;
+			indexArray[(x + z * (worldWidth-1))*6 + 1] = x + (z+1) * worldWidth;
+			indexArray[(x + z * (worldWidth-1))*6 + 2] = x+1 + z * worldWidth;
 		// Triangle 2
-			indexArray[(x + z * (tex->width-1))*6 + 3] = x+1 + z * tex->width;
-			indexArray[(x + z * (tex->width-1))*6 + 4] = x + (z+1) * tex->width;
-			indexArray[(x + z * (tex->width-1))*6 + 5] = x+1 + (z+1) * tex->width;
+			indexArray[(x + z * (worldWidth-1))*6 + 3] = x+1 + z * worldWidth;
+			indexArray[(x + z * (worldWidth-1))*6 + 4] = x + (z+1) * worldWidth;
+			indexArray[(x + z * (worldWidth-1))*6 + 5] = x+1 + (z+1) * worldWidth;
 		}
 
 	// End of terrain generation

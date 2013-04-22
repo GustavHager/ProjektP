@@ -17,7 +17,7 @@ GLfloat* heightmap;
 
 Point3D* getQuad(GLfloat x, GLfloat z);
 GLfloat getHeightInPoint(GLfloat x,GLfloat z);
-Model* GenerateTerrain(TextureData *tex);
+Model* GenerateTerrain();
 
 void generate_world(int width, int height);
 void initWorldgen(int width, int height);
