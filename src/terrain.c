@@ -81,14 +81,14 @@ void initWorldgen(int width, int height){
 
 
 void generate_world(int width, int height){
-#define NUM_ITERS 30
+#define NUM_ITERS 500
   
   initWorldgen(width,height);
   int i;
-	double displacement = 10;
+  double displacement = 5;
   for(i=0; i < NUM_ITERS; i++){
     displace_terrain(width,height,displacement);
-	  displacement = displacement*0.9;	
+	displacement = displacement*0.99;	
   }
 }
 
@@ -128,8 +128,8 @@ void displace_terrain(int width, int height,double displacement){
 
 Model* GenerateTerrain(){
 
-	worldWidth = 512;
-	worldHeight = 512;
+	worldWidth = 1024;
+	worldHeight = 1024;
 
 
 	int vertexCount = worldWidth * worldHeight;
