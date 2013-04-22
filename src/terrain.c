@@ -100,12 +100,14 @@ void initWorldgen(int width, int height){
 
 
 void generate_world(int width, int height){
-#define NUM_ITERS 150
+#define NUM_ITERS 100
   
   initWorldgen(width,height);
   int i;
+	double displacement = 10;
   for(i=0; i < NUM_ITERS; i++){
-    displace_terrain(width,height);
+    displace_terrain(width,height,displacement);
+	  displacement = displacement*0.9;	
   }
 }
 
@@ -119,7 +121,7 @@ GLfloat get_height(int x, int z, int width, int height){
    }
 }
 
-void displace_terrain(int width, int height){
+void displace_terrain(int width, int height,double displacement){
 	
 		
 	double v = rand();
@@ -130,7 +132,6 @@ void displace_terrain(int width, int height){
 	// therefore c will be a random number between -d/2 and d/2
 	double c_random = ((double)rand() / (double)RAND_MAX);
 	double c = c_random * d - d/2;
-	double displacement = 0.1;
 	int x,z;
 
 	for(x=0; x < width; x++){
@@ -146,8 +147,8 @@ void displace_terrain(int width, int height){
 
 Model* GenerateTerrain(){
 
-	worldWidth = 255;
-	worldHeight = 255;
+	worldWidth = 512;
+	worldHeight = 512;
 
 
 	int vertexCount = worldWidth * worldHeight;
