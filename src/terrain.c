@@ -81,14 +81,14 @@ void initWorldgen(int width, int height){
 
 
 void generate_world(int width, int height){
-#define NUM_ITERS 500
+#define NUM_ITERS 100
   
   initWorldgen(width,height);
   int i;
   double displacement = 5;
   for(i=0; i < NUM_ITERS; i++){
     displace_terrain(width,height,displacement);
-	displacement = displacement*0.99;	
+		displacement = displacement*0.9999;	
   }
 }
 
@@ -106,21 +106,25 @@ void displace_terrain(int width, int height,double displacement){
 	
 		
 	double v = rand();
-	double b = sin(v);
-	double a = cos(v);
+	double a = sin(v);
+	double b = cos(v);
 	double d = sqrt(pow(width,2) + pow(height,2));
 	// rand() / RAND_MAX gives a random number between 0 and 1.
 	// therefore c will be a random number between -d/2 and d/2
 	double c_random = ((double)rand() / (double)RAND_MAX);
 	double c = c_random * d - d/2;
 	int x,z;
+	double random_displace = displacement * ((double)rand() / (double)RAND_MAX);
+	double distance;
 
 	for(x=0; x < width; x++){
 		for(z=0; z < height; z++){
+		  random_displace = 0.05 * ((double)rand() / (double)RAND_MAX);
+			distance = abs(a*x + b*z + c) / sqrt(pow(a,2) + pow(b,2));
 			if(a*x + b*z - c > 0){
-				heightmap[x*width+z] = heightmap[x*width+z] + displacement; 
+				heightmap[x*width+z] = heightmap[x*width+z] + displacement*sin(3.14/4.0 * (distance/d)) + (distance/d)*random_displace;
 			}else{
-				heightmap[x*width+z] = heightmap[x*width+z] - displacement;
+				heightmap[x*width+z] = heightmap[x*width+z] - displacement*sin(3.14/4.0 * (distance/d)) - (distance/d)*random_displace;
 			}
 		}
 	}
@@ -128,8 +132,8 @@ void displace_terrain(int width, int height,double displacement){
 
 Model* GenerateTerrain(){
 
-	worldWidth = 1024;
-	worldHeight = 1024;
+	worldWidth = 512;
+	worldHeight = 512;
 
 
 	int vertexCount = worldWidth * worldHeight;

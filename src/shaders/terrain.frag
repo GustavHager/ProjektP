@@ -9,7 +9,9 @@ uniform sampler2D tex;
 
 void main(void)
 {
-	const vec3 light = vec3(0.7,0.5,0);
+	const vec3 light = vec3(0.0,1.0,0.0);
+
+
 	float shade = dot(normalize(exNormal),light);
 	outColor = texture(tex, texCoord) * shade;
 }
