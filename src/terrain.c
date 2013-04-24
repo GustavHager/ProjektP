@@ -79,6 +79,97 @@ void initWorldgen(int width, int height){
 	}
 }
 
+double random_number(double range){
+	return ((double)rand() / (double)RAND_MAX) * range;
+}
+
+
+struct square* make_square(int x, int z, int w, int h){
+	
+	struct square* s = malloc(sizeof(struct square));
+	s->x = x;
+	s->z = z;
+	s->w = w;
+	s->h = h;
+	s->next = NULL;
+
+	return s;
+}
+
+void s_stack_push(struct square *s){
+	s->next = s_stack;
+	s_stack = s;
+}
+
+struct square* s_stack_pop(){
+
+	struct square *ss = s_stack;
+	
+	if(s_stack != NULL){
+		s_stack = s_stack->next;
+	}
+	
+	return ss;
+}
+
+double mean_corners(struct square* s){
+	double sum	= heightmap[s->x*worldWidth+s->z]+	
+	heightmap[(s->x+s->w)*worldWidth+s->z] +	
+	heightmap[(s->x+s->w)*worldWidth+(s->z+s->h)] +
+	heightmap[s->x*worldWidth+(s->z+s->h)]; 
+
+	return sum/4.0;
+}
+
+int get_index(int x, int z){
+return (x*worldWidth+z);
+}
+
+int get_midpoint(struct square* s){
+	return get_index(floor((s->x+s->w)/2),floor((s->z + s->h)/2));
+}
+
+void displace_square_midpoint(struct square* s){
+		double range = 100;
+
+		if (heightmap[get_index(s->x, s->z)] != 0) {
+			heightmap[get_index(s->x, s->z)] = random_number(range);
+		}
+		if (heightmap[get_index((s->x+s->w), s->z)] != 0) {
+			heightmap[get_index((s->x+s->w), s->z)] = random_number(range);
+		}
+		if (heightmap[get_index(s->x+s->w, s->z+s->h)] != 0) {
+			heightmap[get_index(s->x+s->w, s->z+s->h)] = random_number(range);
+		}
+		if (heightmap[get_index(s->x, s->z+s->h)] != 0) {
+			heightmap[get_index(s->x, s->z+s->h)] = random_number(range);
+		}
+		if (heightmap[get_midpoint(s)] != 0){
+			heightmap[get_midpoint(s)] = random_number(range/2) + mean_corners(s);
+		}
+}
+
+void midplace_generate(int width, int height){
+	initWorldgen(width,height);
+
+	struct square *current = NULL;
+
+	s_stack = make_square(0,0,width-1,height-1);
+	
+
+	while(current = s_stack_pop()){
+		//do stuff with current
+		displace_square_midpoint(current);		
+	
+		int nW = floor(current->w/2);
+		int nH = floor(current->h/2);
+
+		s_stack_push(make_square(current->x,current->z,nW,nH)); //1
+		s_stack_push(make_square(current->x+nW,current->z,nW,nH)); //2
+		s_stack_push(make_square(current->x+nW,current->z+nH,nW,nH)); //3
+		s_stack_push(make_square(current->x,current->z+nH,nW,nH)); //4
+	}
+}
 
 void generate_world(int width, int height){
 #define NUM_ITERS 750
@@ -88,7 +179,7 @@ void generate_world(int width, int height){
   double displacement = 5.0;
   for(i=0; i < NUM_ITERS; i++){
     displace_terrain(width,height,displacement);
-    displacement = displacement - displacement * 1.0/750.0;	
+    displacement = displacement - displacement * 1.0/NUM_ITERS;	
   }
 }
 
@@ -97,7 +188,7 @@ GLfloat get_height(int x, int z, int width, int height){
       //printf("now at: %f \n",heightmap[x*width + z]);
       return heightmap[x*width + z];
    }else{
-      printf("invalid coordinate for worldgen, fuck you!\n");
+      printf("invalid coordinate for worldgen **** you!\n");
       return -100000000;
    }
 }
@@ -122,9 +213,9 @@ void displace_terrain(int width, int height,double displacement){
 		  random_displace = 0.05 * ((double)rand() / (double)RAND_MAX);
 			distance = abs(a*x + b*z + c) / sqrt(pow(a,2) + pow(b,2));
 			if(a*x + b*z - c > 0){
-				heightmap[x*width+z] = heightmap[x*width+z] + displacement*sin(3.14/4.0 * (distance/d)) + (distance/d)*random_displace;
+				heightmap[x*width+z] = heightmap[x*width+z] + displacement*sin(3.14/2.0 * (distance/d)) + (distance/d)*random_displace;
 			}else{
-				heightmap[x*width+z] = heightmap[x*width+z] - displacement*sin(3.14/4.0 * (distance/d)) - (distance/d)*random_displace;
+				heightmap[x*width+z] = heightmap[x*width+z] - displacement*sin(3.14/2.0 * (distance/d)) - (distance/d)*random_displace;
 			}
 		}
 	}
@@ -150,7 +241,9 @@ Model* GenerateTerrain(){
 
 	GLfloat Xcoord,Ycoord,Zcoord,X2coord,Y2coord,Z2coord,X3coord,Y3coord,Z3coord;
 	
-	generate_world(worldWidth,worldHeight);
+	//generate_world(worldWidth,worldHeight);
+	midplace_generate(worldWidth, worldHeight);
+
 
 	for (x = 0; x < worldWidth; x++)
 		for (z = 0; z < worldHeight; z++)

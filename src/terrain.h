@@ -9,6 +9,14 @@
 #include "libs/loadobj.h"
 #include "libs/LoadTGA2.h"
 
+struct square{
+	int x,z;
+	int w,h;
+	struct square *next;
+};
+
+struct square *s_stack;
+
 GLfloat *vertexArray;
 int worldWidth;
 int worldHeight;
