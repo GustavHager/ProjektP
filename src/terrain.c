@@ -81,14 +81,14 @@ void initWorldgen(int width, int height){
 
 
 void generate_world(int width, int height){
-#define NUM_ITERS 100
+#define NUM_ITERS 750
   
   initWorldgen(width,height);
   int i;
-  double displacement = 5;
+  double displacement = 5.0;
   for(i=0; i < NUM_ITERS; i++){
     displace_terrain(width,height,displacement);
-		displacement = displacement*0.9999;	
+    displacement = displacement - displacement * 1.0/750.0;	
   }
 }
 
