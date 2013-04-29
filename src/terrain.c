@@ -80,12 +80,12 @@ void initWorldgen(int width, int height){
 }
 
 double random_number(double range){
-	return ((double)rand() / (double)RAND_MAX) * range;
+	return (((double)rand() / (double)RAND_MAX) * range);
 }
 
 
 struct square* make_square(int x, int z, int w, int h){
-	
+
 	struct square* s = malloc(sizeof(struct square));
 	s->x = x;
 	s->z = z;
@@ -104,19 +104,19 @@ void s_stack_push(struct square *s){
 struct square* s_stack_pop(){
 
 	struct square *ss = s_stack;
-	
+
 	if(s_stack != NULL){
 		s_stack = s_stack->next;
 	}
-	
+
 	return ss;
 }
 
 double mean_corners(struct square* s){
-	double sum	= heightmap[s->x*worldWidth+s->z]+	
-	heightmap[(s->x+s->w)*worldWidth+s->z] +	
+	double sum	= heightmap[s->x*worldWidth+s->z]+
+	heightmap[(s->x+s->w)*worldWidth+s->z] +
 	heightmap[(s->x+s->w)*worldWidth+(s->z+s->h)] +
-	heightmap[s->x*worldWidth+(s->z+s->h)]; 
+	heightmap[s->x*worldWidth+(s->z+s->h)];
 
 	return sum/4.0;
 }
@@ -129,24 +129,45 @@ int get_midpoint(struct square* s){
 	return get_index(floor((s->x+s->w)/2),floor((s->z + s->h)/2));
 }
 
-void displace_square_midpoint(struct square* s){
-		double range = 100;
+double square_area(struct square* s){
+    return (double)(s->w * s->h);
+}
 
-		if (heightmap[get_index(s->x, s->z)] != 0) {
-			heightmap[get_index(s->x, s->z)] = random_number(range);
-		}
-		if (heightmap[get_index((s->x+s->w), s->z)] != 0) {
-			heightmap[get_index((s->x+s->w), s->z)] = random_number(range);
-		}
-		if (heightmap[get_index(s->x+s->w, s->z+s->h)] != 0) {
-			heightmap[get_index(s->x+s->w, s->z+s->h)] = random_number(range);
-		}
-		if (heightmap[get_index(s->x, s->z+s->h)] != 0) {
-			heightmap[get_index(s->x, s->z+s->h)] = random_number(range);
-		}
-		if (heightmap[get_midpoint(s)] != 0){
-			heightmap[get_midpoint(s)] = random_number(range/2) + mean_corners(s);
-		}
+bool index_exists(int x, int z){
+    if (x >= 0 && x < worldHeight && z >= 0 && z < worldHeight){
+        return true;
+}else {
+    return false;
+    }
+}
+
+void displace_square_midpoint(struct square* s){
+    double range = 0.00001;
+
+    heightmap[get_midpoint(s)] = random_number(range) + mean_corners(s);
+    double average;
+    int divFactor = 2;
+
+    average = (heightmap[get_index(s->x, s->z)] + heightmap[get_index(s->x,s->z+s->w)]) ;
+    divFactor = 3;
+    if (index_exists(s->x-(s->h/2), s->z +(s->w)/2)){
+        average = average + heightmap[get_index(s->x-(s->h/2), s->z +(s->w)/2)];
+        divFactor = 4;
+    }
+    average = random_number(range) + (average + heightmap[get_midpoint(s)])/divFactor;
+
+    heightmap[get_index(s->x, s->z+(s->w)/2)] = random_number(range) + average;
+
+    average = (heightmap[get_index(s->x, s->z+s->w)] + heightmap[get_index(s->x+s->h,s->z+s->w)]) / 2;
+    heightmap[get_index(s->x+(s->h)/2, s->z+(s->w))] = random_number(range) + average;
+
+    average = (heightmap[get_index(s->x+s->h, s->z+s->w)] + heightmap[get_index(s->x+s->h,s->z)]) / 2;
+    heightmap[get_index(s->x+s->h, s->z+(s->w)/2)] = random_number(range) + average;
+
+    average = (heightmap[get_index(s->x, s->z)] + heightmap[get_index(s->x+s->h,s->z)]) / 2;
+    heightmap[get_index(s->x+(s->h)/2, s->z)] = random_number(range) + average;
+
+
 }
 
 void midplace_generate(int width, int height){
@@ -154,32 +175,39 @@ void midplace_generate(int width, int height){
 
 	struct square *current = NULL;
 
-	s_stack = make_square(0,0,width-1,height-1);
-	
+	s_stack = make_square(0,0,width,height);
+    double range = 50.0;
+	heightmap[get_index(s_stack->x, s_stack->z)] = random_number(range);
+    heightmap[get_index((s_stack->x+s_stack->w), s_stack->z)] = random_number(range);
+    heightmap[get_index(s_stack->x+s_stack->w, s_stack->z+s_stack->h)] = random_number(range);
+    heightmap[get_index(s_stack->x, s_stack->z+s_stack->h)] = random_number(range);
+    heightmap[get_midpoint(s_stack)] = random_number(range) + mean_corners(s_stack);
+
+
 
 	while(current = s_stack_pop()){
 		//do stuff with current
-		displace_square_midpoint(current);		
-	
-		int nW = floor(current->w/2);
-		int nH = floor(current->h/2);
-
-		s_stack_push(make_square(current->x,current->z,nW,nH)); //1
-		s_stack_push(make_square(current->x+nW,current->z,nW,nH)); //2
-		s_stack_push(make_square(current->x+nW,current->z+nH,nW,nH)); //3
-		s_stack_push(make_square(current->x,current->z+nH,nW,nH)); //4
+		displace_square_midpoint(current);
+		int nW = (current->w/2);
+		int nH = (current->h/2);
+        if (current->w >= 1 && current->h >= 1){
+            s_stack_push(make_square(current->x,current->z,nW,nH)); //1
+            s_stack_push(make_square(current->x+nW,current->z,nW,nH)); //2
+            s_stack_push(make_square(current->x+nW,current->z+nH,nW,nH)); //3
+            s_stack_push(make_square(current->x,current->z+nH,nW,nH)); //4
+        }
 	}
 }
 
 void generate_world(int width, int height){
 #define NUM_ITERS 750
-  
+
   initWorldgen(width,height);
   int i;
   double displacement = 5.0;
   for(i=0; i < NUM_ITERS; i++){
     displace_terrain(width,height,displacement);
-    displacement = displacement - displacement * 1.0/NUM_ITERS;	
+    displacement = displacement - displacement * 1.0/NUM_ITERS;
   }
 }
 
@@ -194,8 +222,8 @@ GLfloat get_height(int x, int z, int width, int height){
 }
 
 void displace_terrain(int width, int height,double displacement){
-	
-		
+
+
 	double v = rand();
 	double a = sin(v);
 	double b = cos(v);
@@ -232,7 +260,7 @@ Model* GenerateTerrain(){
 	int x, z;
 
 	srand(1124132);
-	
+
 
 	vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
 	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
@@ -240,7 +268,7 @@ Model* GenerateTerrain(){
 	GLuint *indexArray = malloc(sizeof(GLuint) * triangleCount*3);
 
 	GLfloat Xcoord,Ycoord,Zcoord,X2coord,Y2coord,Z2coord,X3coord,Y3coord,Z3coord;
-	
+
 	//generate_world(worldWidth,worldHeight);
 	midplace_generate(worldWidth, worldHeight);
 
