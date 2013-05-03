@@ -87,13 +87,13 @@ void display(void){
 	IdentityMatrix(modelView);
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, modelView);
-  glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, camMatrix);
+    glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, camMatrix);
 
-  	
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex1);		// Bind Our Texture tex1
-	
-	
+
+
 	DrawModel(tm, program, "inPosition", "inNormal", "inTexCoord");
 	printError("display 4");
 
@@ -103,7 +103,7 @@ void display(void){
 
 void init(void){
 	// GL inits
-	glClearColor(0.2,0.2,0.5,0);
+	glClearColor(0.0,0.0,0.0,0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	printError("GL inits");
@@ -121,10 +121,18 @@ void init(void){
 	LoadTGATextureSimple("res/dirt.tga", &tex1);
 
 
+	GLfloat HeightRange[2] = {(double)Ymin, (double)Ymax};
+	glUniform2fv(glGetUniformLocation(program, "heightRange"), 2, HeightRange);
+
+
 	//Load terrain data
 
 	LoadTGATexture("res/TERRA2.tga", &ttex);
 	tm = GenerateTerrain();
+
+	//compute terrain range
+
+
 	printError("init terrain");
 
 }

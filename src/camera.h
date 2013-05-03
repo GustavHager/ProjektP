@@ -8,6 +8,7 @@
 #include "libs/loadobj.h"
 #include "libs/LoadTGA2.h"
 #include "libs/objectHandler.h"
+#include "terrain.h"
 #include "objects.h"
 
 #define PI 3.1415

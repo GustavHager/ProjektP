@@ -20,7 +20,8 @@ struct square *s_stack;
 GLfloat *vertexArray;
 int worldWidth;
 int worldHeight;
-
+double Ymin;
+double Ymax;
 GLfloat* heightmap;
 
 Point3D* getQuad(GLfloat x, GLfloat z);
@@ -31,5 +32,7 @@ void generate_world(int width, int height);
 void initWorldgen(int width, int height);
 GLfloat get_height(int x, int z, int width, int height);
 void displace_terrain(int width, int height,double displacement);
+
+
 
 #endif

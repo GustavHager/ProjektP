@@ -70,7 +70,7 @@ GLfloat getHeightInPoint(GLfloat x,GLfloat z){
 
 
 void initWorldgen(int width, int height){
-	heightmap = malloc(sizeof(GLfloat)*width*height);
+	heightmap = malloc(sizeof(GLfloat)*(width)*(height));
 	int x, z;
 	for(x=0; x < width; x++){
 	  for(z=0; z < height; z++){
@@ -80,7 +80,7 @@ void initWorldgen(int width, int height){
 }
 
 double random_number(double range){
-	return (((double)rand() / (double)RAND_MAX) * range);
+	return (((double)rand() / (double)RAND_MAX) * range) - range/2;
 }
 
 
@@ -96,21 +96,6 @@ struct square* make_square(int x, int z, int w, int h){
 	return s;
 }
 
-void s_stack_push(struct square *s){
-	s->next = s_stack;
-	s_stack = s;
-}
-
-struct square* s_stack_pop(){
-
-	struct square *ss = s_stack;
-
-	if(s_stack != NULL){
-		s_stack = s_stack->next;
-	}
-
-	return ss;
-}
 
 double mean_corners(struct square* s){
 	double sum	= heightmap[s->x*worldWidth+s->z]+
@@ -126,7 +111,7 @@ return (x*worldWidth+z);
 }
 
 int get_midpoint(struct square* s){
-	return get_index(floor((s->x+s->w)/2),floor((s->z + s->h)/2));
+	return get_index(((s->x+s->w)/2),((s->z + s->h)/2));
 }
 
 double square_area(struct square* s){
@@ -134,70 +119,111 @@ double square_area(struct square* s){
 }
 
 bool index_exists(int x, int z){
-    if (x >= 0 && x < worldHeight && z >= 0 && z < worldHeight){
+    if ((x >= 0 && x < worldHeight) && (z >= 0 && z < worldHeight)){
         return true;
 }else {
     return false;
     }
 }
 
-void displace_square_midpoint(struct square* s){
-    double range = 0.00001;
+void set_square(int x, int z, int width, double range){
+        double average = 0.0;
+        double divFactor = 0.0;
 
-    heightmap[get_midpoint(s)] = random_number(range) + mean_corners(s);
-    double average;
-    int divFactor = 2;
+        if (index_exists(x+width/2, z)){
+            average = average + heightmap[get_index(x+width/2, z)];
+            divFactor = divFactor + 1.0;
 
-    average = (heightmap[get_index(s->x, s->z)] + heightmap[get_index(s->x,s->z+s->w)]) ;
-    divFactor = 3;
-    if (index_exists(s->x-(s->h/2), s->z +(s->w)/2)){
-        average = average + heightmap[get_index(s->x-(s->h/2), s->z +(s->w)/2)];
-        divFactor = 4;
-    }
-    average = random_number(range) + (average + heightmap[get_midpoint(s)])/divFactor;
+        }
+        if(index_exists(x,z+width/2)){
+            average = average + heightmap[get_index(x,z+width/2)];
+            divFactor = divFactor + 1.0;
 
-    heightmap[get_index(s->x, s->z+(s->w)/2)] = random_number(range) + average;
+        }
+        if(index_exists(x-width/2, z)){
+            average = average + heightmap[get_index(x-width/2, z)];
+            divFactor = divFactor + 1.0;
 
-    average = (heightmap[get_index(s->x, s->z+s->w)] + heightmap[get_index(s->x+s->h,s->z+s->w)]) / 2;
-    heightmap[get_index(s->x+(s->h)/2, s->z+(s->w))] = random_number(range) + average;
+        }
+        if(index_exists(x, z-width/2)){
+            average = average + heightmap[get_index(x, z-width/2)];
+            divFactor = divFactor + 1.0;
 
-    average = (heightmap[get_index(s->x+s->h, s->z+s->w)] + heightmap[get_index(s->x+s->h,s->z)]) / 2;
-    heightmap[get_index(s->x+s->h, s->z+(s->w)/2)] = random_number(range) + average;
-
-    average = (heightmap[get_index(s->x, s->z)] + heightmap[get_index(s->x+s->h,s->z)]) / 2;
-    heightmap[get_index(s->x+(s->h)/2, s->z)] = random_number(range) + average;
-
-
+        }
+            average = average/divFactor;
+            heightmap[get_index(x,z)] = average + random_number(range);
 }
+
+
+
+void square_step(int width, double range){
+        int x = 0;
+        int z = 0;
+
+        for (x=width/2; x < worldWidth-width/2; x = x+width){
+            for(z = 0; z < worldHeight; z = z+width){
+                set_square(x,z,width, range);
+            }
+        }
+        for (x=0; x < worldWidth; x = x+width){
+            for(z = width/2; z < worldHeight-width/2; z = z+width){
+                set_square(x,z,width, range);
+            }
+        }
+}
+
+void diamond_step(int width, double range){
+        int x = 0;
+        int z = 0;
+
+        double corners_mean = 0;
+
+        for (x=width/2; x <= worldWidth-width/2; x = x+width){
+            for(z = width/2; z <= worldHeight-width/2; z = z+width){
+
+                corners_mean = heightmap[get_index(x-width/2,z-width/2)]+heightmap[get_index(x-width/2,z+width/2)] + heightmap[get_index(x+width/2,z-width/2)]+heightmap[get_index(x+width/2,z+width/2)];
+                heightmap[get_index(x,z)] = corners_mean/4+random_number(range);
+            }
+        }
+}
+
+
+
+
+
+
 
 void midplace_generate(int width, int height){
 	initWorldgen(width,height);
+    double range = ceil(width/1.5);
+    Ymin = -range/2;
+    Ymax = range/2;
 
-	struct square *current = NULL;
+	heightmap[get_index(0, 0)] =  random_number(range);
+    heightmap[get_index(width-1, 0)] = random_number(range);
+    heightmap[get_index(width-1, height-1)] = random_number(range);
+    heightmap[get_index(0,height-1)] = random_number(range);
 
-	s_stack = make_square(0,0,width,height);
-    double range = 50.0;
-	heightmap[get_index(s_stack->x, s_stack->z)] = random_number(range);
-    heightmap[get_index((s_stack->x+s_stack->w), s_stack->z)] = random_number(range);
-    heightmap[get_index(s_stack->x+s_stack->w, s_stack->z+s_stack->h)] = random_number(range);
-    heightmap[get_index(s_stack->x, s_stack->z+s_stack->h)] = random_number(range);
-    heightmap[get_midpoint(s_stack)] = random_number(range) + mean_corners(s_stack);
+    double iterRange = width/2.2;
+    int w;
 
+    int c=0;
+    for(w = (width-1); w > 1; w = w/2){
+        diamond_step(w,iterRange);
+        square_step(w,iterRange);
+        iterRange = iterRange/2;
+    }
 
-
-	while(current = s_stack_pop()){
-		//do stuff with current
-		displace_square_midpoint(current);
-		int nW = (current->w/2);
-		int nH = (current->h/2);
-        if (current->w >= 1 && current->h >= 1){
-            s_stack_push(make_square(current->x,current->z,nW,nH)); //1
-            s_stack_push(make_square(current->x+nW,current->z,nW,nH)); //2
-            s_stack_push(make_square(current->x+nW,current->z+nH,nW,nH)); //3
-            s_stack_push(make_square(current->x,current->z+nH,nW,nH)); //4
-        }
-	}
+    printf("lastw is: %d \n",w);
 }
+
+
+
+
+
+
+
+
 
 void generate_world(int width, int height){
 #define NUM_ITERS 750
@@ -251,15 +277,17 @@ void displace_terrain(int width, int height,double displacement){
 
 Model* GenerateTerrain(){
 
-	worldWidth = 512;
-	worldHeight = 512;
+    int worldSize = 1024*2;
+
+	worldWidth = worldSize+1;
+	worldHeight = worldSize+1;
 
 
 	int vertexCount = worldWidth * worldHeight;
 	int triangleCount = (worldWidth-1) * (worldHeight-1) * 2;
 	int x, z;
 
-	srand(1124132);
+	srand(1956099);
 
 
 	vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
@@ -271,6 +299,9 @@ Model* GenerateTerrain(){
 
 	//generate_world(worldWidth,worldHeight);
 	midplace_generate(worldWidth, worldHeight);
+    //    initWorldgen(worldWidth,worldWidth);
+
+
 
 
 	for (x = 0; x < worldWidth; x++)
@@ -344,3 +375,4 @@ Model* GenerateTerrain(){
 
 	return model;
 }
+
