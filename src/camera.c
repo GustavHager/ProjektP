@@ -91,7 +91,7 @@ void display(void){
 
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex1);		// Bind Our Texture tex1
+	glBindTexture(GL_TEXTURE_2D, ttex.texID);		// Bind Our Texture tex1
 
 
 	DrawModel(tm, program, "inPosition", "inNormal", "inTexCoord");
@@ -126,9 +126,9 @@ void init(void){
 
 
 	//Load terrain data
-
-	LoadTGATexture("res/TERRA2.tga", &ttex);
+	//LoadTGATexture("res/TERRA2.tga", &ttex);
 	tm = GenerateTerrain();
+    ttex = generateColormap();
 
 	//compute terrain range
 

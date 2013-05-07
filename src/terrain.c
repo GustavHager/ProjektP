@@ -275,6 +275,60 @@ void displace_terrain(int width, int height,double displacement){
 	}
 }
 
+void initColormap(void){
+    colormap = malloc(worldWidth*worldHeight*4*sizeof(GLfloat));
+    int i;
+
+    for(i=0; i < worldWidth*worldHeight*4; i++){
+        colormap[i] = 255;
+    }
+
+}
+
+TextureData generateColormap(void){
+    initColormap();
+    int x,z;
+    float height;
+
+    for(x=0; x < worldWidth; x++){
+        for(z=0; z < worldHeight; z++){
+            height = heightmap[get_index(x,z)];
+            if (height < 0) {
+                colormap[get_index(x,z)] = 0;
+                colormap[get_index(x,z)+1] = 0;
+                colormap[get_index(x,z)+2] = 0;
+            }else{
+                colormap[get_index(x,z)] = 0;
+                colormap[get_index(x,z)+1] = 255;
+                colormap[get_index(x,z)+2] = 0;
+            }
+        }
+    }
+
+printf("noseg\n");
+
+TextureData groundTexture;
+groundTexture.imageData = colormap;
+groundTexture.width = worldWidth;
+groundTexture.height = worldHeight;
+groundTexture.bpp = 24;
+
+printf("did you say seg\n");
+
+glGenTextures(1, &groundTexture.texID);			// Generate OpenGL texture IDs
+printf("kuken\n");
+glBindTexture(GL_TEXTURE_2D, groundTexture.texID);		// Bind Our Texture
+printf("SEG ME\n");
+glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtered
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, groundTexture.width, groundTexture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, groundTexture.imageData);
+
+printf("nowseg\n");
+
+SaveTGA(&groundTexture,"filnamn.tga");
+
+return groundTexture;
+}
+
 Model* GenerateTerrain(){
 
     int worldSize = 1024*2;
@@ -361,6 +415,10 @@ Model* GenerateTerrain(){
 		}
 
 	// End of terrain generation
+
+    //generateColormap(void);
+
+    //generate a terrain texture
 
 	// Create Model and upload to GPU:
 
