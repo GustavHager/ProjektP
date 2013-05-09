@@ -6,7 +6,7 @@ in vec2 inTexCoord;
 
 out vec2 texCoord;
 out vec3 exNormal;
-out vec4 colorMod;
+out vec3 viewDir;
 
 uniform mat4 projMatrix;
 uniform mat4 mdlMatrix;
@@ -18,18 +18,11 @@ void main(void){
 
 	mat3 normalMatrix = mat3(mdlMatrix);
 
-	exNormal = inNormal * normalMatrix;
+	exNormal = normalize(inNormal);
+
 	texCoord = inTexCoord;
-
-    //vec4 white = vec4(1,1,1,1);
-    //vec4 green = vec4(0,1,0,1);
-
-
-	colorMod = vec4(1.0,
-                    1.0,
-                    1.0,
-                    1.0);
-
+    vec3 eyeToSurface = vec3(mdlMatrix* vec4(inPosition,1));
+    viewDir = normalize(eyeToSurface);
 
 	gl_Position = projMatrix * mdlMatrix * camMatrix * vec4(inPosition, 1.0);
 }

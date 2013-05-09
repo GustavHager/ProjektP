@@ -24,7 +24,14 @@ double Ymin;
 double Ymax;
 GLfloat* heightmap;
 
-GLbyte* colormap;
+GLubyte* colormap;
+
+GLfloat max_point;
+GLfloat water_level;
+GLfloat min_point;
+GLfloat average_height;
+GLfloat max_slope;
+
 
 Point3D* getQuad(GLfloat x, GLfloat z);
 GLfloat getHeightInPoint(GLfloat x,GLfloat z);
@@ -34,6 +41,9 @@ void generate_world(int width, int height);
 void initWorldgen(int width, int height);
 GLfloat get_height(int x, int z, int width, int height);
 void displace_terrain(int width, int height,double displacement);
+
+void post_process_terrain();
+
 TextureData generateColormap(void);
 
 

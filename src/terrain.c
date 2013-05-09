@@ -155,7 +155,6 @@ void set_square(int x, int z, int width, double range){
 }
 
 
-
 void square_step(int width, double range){
         int x = 0;
         int z = 0;
@@ -188,11 +187,6 @@ void diamond_step(int width, double range){
 }
 
 
-
-
-
-
-
 void midplace_generate(int width, int height){
 	initWorldgen(width,height);
     double range = ceil(width/1.5);
@@ -213,16 +207,8 @@ void midplace_generate(int width, int height){
         square_step(w,iterRange);
         iterRange = iterRange/2;
     }
-
-    printf("lastw is: %d \n",w);
+    post_process_terrain();
 }
-
-
-
-
-
-
-
 
 
 void generate_world(int width, int height){
@@ -276,13 +262,17 @@ void displace_terrain(int width, int height,double displacement){
 }
 
 void initColormap(void){
-    colormap = malloc(worldWidth*worldHeight*4*sizeof(GLfloat));
+    colormap = malloc(worldWidth*worldHeight*3*sizeof(GLubyte));
     int i;
+    float randomOffset = random_number(10);
 
-    for(i=0; i < worldWidth*worldHeight*4; i++){
-        colormap[i] = 255;
+    for(i=0; i < worldWidth*worldHeight*3; i++){
+        colormap[i] = 100 + randomOffset;
+
+        if(i % 3 == 0){
+            randomOffset = random_number(10);
+        }
     }
-
 }
 
 TextureData generateColormap(void){
@@ -290,39 +280,56 @@ TextureData generateColormap(void){
     int x,z;
     float height;
 
-    for(x=0; x < worldWidth; x++){
-        for(z=0; z < worldHeight; z++){
+    for(x=0; x < worldWidth-1; x++){
+        for(z=0; z < worldHeight-1; z++){
             height = heightmap[get_index(x,z)];
-            if (height < 0) {
-                colormap[get_index(x,z)] = 0;
-                colormap[get_index(x,z)+1] = 0;
-                colormap[get_index(x,z)+2] = 0;
-            }else{
-                colormap[get_index(x,z)] = 0;
-                colormap[get_index(x,z)+1] = 255;
-                colormap[get_index(x,z)+2] = 0;
+
+            float randomOffset = (float)random_number(10);
+            float realHeight = height;
+            height = height + randomOffset;
+
+            if (height < 100) { //grass/green stuff
+                colormap[(z*(worldWidth-1)+x)*3 + 0] = 102;
+                colormap[(z*(worldWidth-1)+x)*3 + 1] = 200 + random_number(10);
+                colormap[(z*(worldWidth-1)+x)*3 + 2] = 0;
             }
+
+            if (height  + random_number(10) > max_point - 100) { //make mountainstops
+                colormap[(z*(worldWidth-1)+x)*3 + 0] = 255;
+                colormap[(z*(worldWidth-1)+x)*3 + 1] = 255;
+                colormap[(z*(worldWidth-1)+x)*3 + 2] = 255;
+            }
+
+            if(realHeight <= min_point + 100){ //water
+                colormap[(z*(worldWidth-1)+x)*3 + 0] = 84;
+                colormap[(z*(worldWidth-1)+x)*3 + 1] = 125;
+                colormap[(z*(worldWidth-1)+x)*3 + 2] = 239;
+            }
+
+            if(realHeight <= min_point + 100 + 5 && realHeight > min_point + 100){ //sand
+                colormap[(z*(worldWidth-1)+x)*3 + 0] = 249;
+                colormap[(z*(worldWidth-1)+x)*3 + 1] = 249;
+                colormap[(z*(worldWidth-1)+x)*3 + 2] = 109;
+            }
+
         }
     }
 
-printf("noseg\n");
 
 TextureData groundTexture;
 groundTexture.imageData = colormap;
-groundTexture.width = worldWidth;
-groundTexture.height = worldHeight;
+groundTexture.width = worldWidth-1;
+groundTexture.height = worldHeight-1;
 groundTexture.bpp = 24;
 
-printf("did you say seg\n");
+
 
 glGenTextures(1, &groundTexture.texID);			// Generate OpenGL texture IDs
-printf("kuken\n");
-glBindTexture(GL_TEXTURE_2D, groundTexture.texID);		// Bind Our Texture
-printf("SEG ME\n");
-glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtered
-glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, groundTexture.width, groundTexture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, groundTexture.imageData);
 
-printf("nowseg\n");
+glBindTexture(GL_TEXTURE_2D, groundTexture.texID);		// Bind Our Texture
+
+glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtered
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, groundTexture.width-1, groundTexture.height-1, 0, GL_RGB, GL_UNSIGNED_BYTE, groundTexture.imageData);
 
 SaveTGA(&groundTexture,"filnamn.tga");
 
@@ -343,7 +350,6 @@ Model* GenerateTerrain(){
 
 	srand(1956099);
 
-
 	vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
 	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
 	GLfloat *texCoordArray = malloc(sizeof(GLfloat) * 2 * vertexCount);
@@ -354,8 +360,6 @@ Model* GenerateTerrain(){
 	//generate_world(worldWidth,worldHeight);
 	midplace_generate(worldWidth, worldHeight);
     //    initWorldgen(worldWidth,worldWidth);
-
-
 
 
 	for (x = 0; x < worldWidth; x++)
@@ -434,3 +438,39 @@ Model* GenerateTerrain(){
 	return model;
 }
 
+void post_process_terrain(){
+//iterate over heightmap
+float h=0;
+int x,z;
+
+min_point = 1000000000;
+max_point = 0;
+    for(x=0; x < worldWidth; x++){
+        for(z=0; z < worldWidth; z++){
+            h = get_height(x,z,worldWidth,worldHeight);
+
+            if(h < min_point){
+                min_point = h;
+            }
+
+            if(h > max_point){
+                max_point = h;
+            }
+        }
+    }
+
+    printf("min is: %f \n", min_point);
+    printf("max is: %f \n", max_point);
+
+    //flatten stuff
+    for(x=0; x < worldWidth; x++){
+        for(z=0; z < worldWidth; z++){
+            h = get_height(x,z,worldWidth,worldHeight);
+
+            if(h <= min_point + 100){
+                heightmap[get_index(x,z)] = min_point + 100;
+            }
+        }
+    }
+
+}

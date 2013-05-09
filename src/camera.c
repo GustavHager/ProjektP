@@ -37,11 +37,11 @@ void timer(int i)
     Point3D offsetVector;
 
     if(keyIsDown('q')){
-        yOffset = yOffset-0.2;
+        yOffset = yOffset-0.5;
     }
 
     if(keyIsDown('e')){
-       yOffset = yOffset+0.2;
+       yOffset = yOffset+0.5;
     }
 
 

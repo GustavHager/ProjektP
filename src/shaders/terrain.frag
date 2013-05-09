@@ -2,7 +2,7 @@
 
 in vec2 texCoord;
 in vec3 exNormal;
-in vec4 colorMod;
+in vec3 viewDir;
 
 out vec4 outColor;
 
@@ -11,19 +11,30 @@ uniform sampler2D tex;
 
 void main(void)
 {
-	const vec3 light = vec3(0.0,1.0,0.0);
-	const vec4 white = vec4(1.0,1.0,1.0,1.0);
-	const vec4 green = vec4(0.0,0.5,0.0,1.0);
-	const vec4 gray  = vec4(0.5,0.5,0.5,1.0);
+	float intensity = 2.0;
+	float diffuse;
+	float specular;
+    vec3 lightVector = vec3(0,1.0,0.7);
+    vec3 s;
+    vec3 r;
+    float ratio = 0.5;
+    float n = 2;
+    vec3 lightColor = vec3(1,1,1);
+    vec3 light;
 
-	vec4 color;
+    diffuse = intensity * dot(exNormal,lightVector);
 
-	float shade = dot(normalize(exNormal),light);
-	float slope = dot(normalize(exNormal),vec3(0.0,1.0,0.0));
+    s = lightVector;
+    r = 2*exNormal*dot(s,exNormal) - s;
 
-    color = gray*(1 - slope) + green * slope;
+    specular = intensity*pow(dot(r,viewDir),n);
 
-    //outColor = color * shade;
+    light = ratio*max(0,diffuse)* lightColor; //+(1-ratio)*max(0,specular)*lightColor;
 
-    outColor = texture(tex, texCoord) * shade;
+    outColor = normalize(texture(tex, texCoord) * vec4(light,1));
+
+
+
+
+
 }

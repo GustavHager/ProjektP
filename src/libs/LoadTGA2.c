@@ -21,7 +21,7 @@ bool LoadTGATextureData(char *filename, TextureData *texture)	// Loads A TGA Fil
 	int b;
 	long row, rowLimit;
 	GLubyte pixelData[4];
-	
+
 	FILE *file = fopen(filename, "rb");			// Open The TGA File
 	err = 0;
 	if (file == NULL) err = 1;				// Does File Even Exist?
@@ -32,7 +32,7 @@ bool LoadTGATextureData(char *filename, TextureData *texture)	// Loads A TGA Fil
 			)
 				err = 3; // Does The Header Match What We Want?
 	else if (fread(header, 1, sizeof(header), file) != sizeof(header)) err = 4; // If So Read Next 6 Header Bytes
-	
+
 	if (err != 0)
 	{
 		switch (err)
@@ -42,7 +42,7 @@ bool LoadTGATextureData(char *filename, TextureData *texture)	// Loads A TGA Fil
 			case 3: printf("unsupported format in %s\n", filename); return false;break;
 			case 4: printf("could not read file %s\n", filename); return false;break;
 		}
-		
+
 		if(file == NULL)		// Did The File Even Exist? *Added Jim Strong*
 			return false;
 		else
@@ -60,14 +60,14 @@ bool LoadTGATextureData(char *filename, TextureData *texture)	// Loads A TGA Fil
 		fclose(file);		// If Anything Failed, Close The File
 		return false;
 	}
-	
+
 	w = 1;
 	while (w < texture->width) w = w << 1;
 	h = 1;
 	while (h < texture->height) h = h << 1;
 	texture->texWidth = (GLfloat)texture->width / w;
 	texture->texHeight = (GLfloat)texture->height / h;
-	
+
 	texture->bpp = header[4];		// Grab The TGA's Bits Per Pixel (24 or 32)
 	bytesPerPixel = texture->bpp/8;		// Divide By 8 To Get The Bytes Per Pixel
 	imageSize = w * h * bytesPerPixel;	// Calculate The Memory Required For The TGA Data
@@ -146,7 +146,7 @@ bool LoadTGATexture(char *filename, TextureData *texture)	// Loads A TGA File In
 	bool result = LoadTGATextureData(filename, texture); // Loads A TGA File Into Memory
 	if (!result)
 		return result;
-	
+
 	GLuint type = GL_RGBA;		// Set The Default GL Mode To RBGA (32 BPP)
 	int h, w;
 
@@ -154,7 +154,7 @@ bool LoadTGATexture(char *filename, TextureData *texture)	// Loads A TGA File In
 	while (w < texture->width) w = w << 1;
 	h = 1;
 	while (h < texture->height) h = h << 1;
-	
+
 	// Build A Texture From The Data
 	glGenTextures(1, &texture[0].texID);			// Generate OpenGL texture IDs
 	glBindTexture(GL_TEXTURE_2D, texture[0].texID);		// Bind Our Texture
@@ -166,14 +166,14 @@ bool LoadTGATexture(char *filename, TextureData *texture)	// Loads A TGA File In
 	}
 //	gluBuild2DMipmaps(GL_TEXTURE_2D, type, w, h, type, GL_UNSIGNED_BYTE, texture[0].imageData);
 	glTexImage2D(GL_TEXTURE_2D, 0, type, w, h, 0, type, GL_UNSIGNED_BYTE, texture[0].imageData);
-	
+
 	return result;
 }
 
 void LoadTGATextureSimple(char *filename, GLuint *tex) // If you really only need the texture object.
 {
 	TextureData texture;
-	
+
 	if (LoadTGATexture(filename, &texture))
 	{
 		if(texture.imageData != NULL)
@@ -186,9 +186,9 @@ void LoadTGATextureSimple(char *filename, GLuint *tex) // If you really only nee
 
 
 // saves an array of pixels as a TGA image
-int tgaSave(char			*filename, 
-			 short int		width, 
-			 short int		height, 
+int tgaSave(char			*filename,
+			 short int		width,
+			 short int		height,
 			 unsigned char	pixelDepth,
 			 unsigned char	*imageData)
 {
@@ -230,9 +230,9 @@ int tgaSave(char			*filename,
 // save the image data
 	w = 1;
 	while (w < width) w = w << 1;
-	bytesPerPixel = pixelDepth/8;	
+	bytesPerPixel = pixelDepth/8;
 	row = width * bytesPerPixel;
-	
+
 // Write one row at a time
 	for (i = 0; i < height; i++)
 	{
@@ -249,6 +249,6 @@ int tgaSave(char			*filename,
 
 void SaveTGA(TextureData *tex, char *filename)
 {
-	tgaSave(filename, tex->width, tex->height, 
+	tgaSave(filename, tex->width, tex->height,
 			tex->bpp, tex->imageData);
 }
