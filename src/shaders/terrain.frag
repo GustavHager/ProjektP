@@ -11,7 +11,7 @@ uniform sampler2D tex;
 
 void main(void)
 {
-	float intensity = 2.0;
+	float intensity = 3.0;
 	float diffuse;
 	float specular;
     vec3 lightVector = vec3(0,1.0,0.7);
@@ -29,7 +29,7 @@ void main(void)
 
     specular = intensity*pow(dot(r,viewDir),n);
 
-    light = ratio*max(0,diffuse)* lightColor; //+(1-ratio)*max(0,specular)*lightColor;
+    light = ratio*max(0,diffuse)* lightColor;
 
     outColor = normalize(texture(tex, texCoord) * vec4(light,1));
 

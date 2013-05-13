@@ -43,5 +43,6 @@ void timer(int i);
 void mouse(int x, int y);
 void display(void);
 void init();
+void setCameraPosition(float x, float y, float z);
 
 #endif

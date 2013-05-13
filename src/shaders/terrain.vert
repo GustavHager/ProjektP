@@ -11,7 +11,6 @@ out vec3 viewDir;
 uniform mat4 projMatrix;
 uniform mat4 mdlMatrix;
 uniform mat4 camMatrix;
-uniform vec2 heightRange;
 
 
 void main(void){

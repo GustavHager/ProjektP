@@ -37,19 +37,21 @@ void timer(int i)
     Point3D offsetVector;
 
     if(keyIsDown('q')){
-        yOffset = yOffset-0.5;
+        l.y = l.y - 1;
+        p.y = p.y - 1;
     }
 
     if(keyIsDown('e')){
-       yOffset = yOffset+0.5;
+       l.y = l.y + 1;
+       p.y = p.y + 1;
     }
 
 
 
     //GLfloat h = getHeightInPoint(p.x,p.z);
 
-    p.y = yOffset;
-    l.y = yOffset;
+    //p.y = yOffset;
+    //l.y = yOffset;
 
 
     if(keyIsDown('z')){
@@ -79,12 +81,16 @@ void display(void){
 
 	GLfloat total[16], modelView[16], camMatrix[16], transMatrix[16], newTotal[16];
 
+
 	printError("pre display");
 
 	// Build matrix
+	IdentityMatrix(modelView);
 	lookAt(&p,&l,0, 1, 0,camMatrix);
 
-	IdentityMatrix(modelView);
+
+    //drawSkybox(lookAt,projectionMatrix,modelView);
+    glUseProgram(program);
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, modelView);
     glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, camMatrix);
@@ -97,22 +103,22 @@ void display(void){
 	DrawModel(tm, program, "inPosition", "inNormal", "inTexCoord");
 	printError("display 4");
 
-
 	glutSwapBuffers();
 }
 
 void init(void){
 	// GL inits
-	glClearColor(0.0,0.0,0.0,0);
+	glClearColor(0.5,0.81,1,0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	printError("GL inits");
 
-	frustum(-0.1, 0.1, -0.1, 0.1, 0.1, 1000.0, projectionMatrix);
+	frustum(-0.1, 0.1, -0.1, 0.1, 0.1, 1000000.0, projectionMatrix);
 
 
 	// Load and compile shader
 	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
+	printError("load shaders");
 	glUseProgram(program);
 	printError("init shader");
 
@@ -129,10 +135,20 @@ void init(void){
 	//LoadTGATexture("res/TERRA2.tga", &ttex);
 	tm = GenerateTerrain();
     ttex = generateColormap();
+    printError("init terrain");
 
-	//compute terrain range
+    //skybox.shaderProgram = loadShaders("shaders/sky.vert","shaders/sky.frag");
+    //loadSky(skybox.shaderProgram);
+    printError("skybox init");
+    setCameraPosition(worldWidth/2,get_height(worldWidth/2,worldWidth/2,worldHeight,worldHeight)+10,worldWidth/2);
+}
 
-
-	printError("init terrain");
-
+void setCameraPosition(float x, float y, float z){
+    p.x = x;
+    p.y = y;
+    p.z = z;
+    printf("i is : %f \n",y);
+    l.x = x + 10;
+    l.y = y;
+    l.z = z + 10;
 }

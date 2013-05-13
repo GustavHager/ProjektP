@@ -35,7 +35,7 @@ char* readFile(char *file)
 	fread(buf, length, 1, fptr); /* Read the contents of the file in to the buffer */
 	fclose(fptr); /* Close the file */
 	buf[length] = 0; /* Null terminator */
-	
+
 	return buf; /* Return the buffer */
 }
 
@@ -83,7 +83,7 @@ void printProgramInfoLog(GLuint obj, const char *vfn, const char *ffn, const cha
 GLuint compileShaders(const char *vs, const char *fs, const char *gs, const char *vfn, const char *ffn, const char *gfn)
 {
 	GLuint v,f,g,p;
-	
+
 	v = glCreateShader(GL_VERTEX_SHADER);
 	f = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(v, 1, &vs, NULL);
@@ -96,7 +96,7 @@ GLuint compileShaders(const char *vs, const char *fs, const char *gs, const char
 		glShaderSource(g, 1, &gs, NULL);
 		glCompileShader(g);
 	}
-	
+
 	p = glCreateProgram();
 	glAttachShader(p,v);
 	glAttachShader(p,f);
@@ -104,13 +104,13 @@ GLuint compileShaders(const char *vs, const char *fs, const char *gs, const char
 		glAttachShader(p,g);
 	glLinkProgram(p);
 	glUseProgram(p);
-	
+
 	printShaderInfoLog(v, vfn);
 	printShaderInfoLog(f, ffn);
 	if (gs != NULL)	printShaderInfoLog(g, gfn);
-	
+
 	printProgramInfoLog(p, vfn, ffn, gfn);
-	
+
 	return p;
 }
 
@@ -124,7 +124,7 @@ GLuint loadShadersG(const char *vertFileName, const char *fragFileName, const ch
 {
 	char *vs, *fs, *gs;
 	GLuint p = 0;
-	
+
 	vs = readFile((char *)vertFileName);
 	fs = readFile((char *)fragFileName);
 	gs = readFile((char *)geomFileName);
@@ -134,8 +134,10 @@ GLuint loadShadersG(const char *vertFileName, const char *fragFileName, const ch
 		printf("Failed to read %s from disk.\n", fragFileName);
 	if ((gs==NULL) && (geomFileName != NULL))
 		printf("Failed to read %s from disk.\n", geomFileName);
-	if ((vs!=NULL)&&(fs!=NULL))
-		p = compileShaders(vs, fs, gs, vertFileName, fragFileName, geomFileName);
+	if ((vs!=NULL)&&(fs!=NULL)){
+	    p = compileShaders(vs, fs, gs, vertFileName, fragFileName, geomFileName);
+	}
+
 	if (vs != NULL) free(vs);
 	if (fs != NULL) free(fs);
 	if (gs != NULL) free(gs);
@@ -299,7 +301,7 @@ FBOstruct *initFBO2(int width, int height, int int_method, int create_depthimage
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glBindTexture(GL_TEXTURE_2D, 0);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fbo->depth, 0);	
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fbo->depth, 0);
       printf("depthtexture: %i\n",fbo->depth);
     }
 
@@ -345,7 +347,7 @@ void useFBO(FBOstruct *out, FBOstruct *in1, FBOstruct *in2)
 			lasth = viewport[3] - viewport[1];
 		}
 	}
-	
+
 	if (out != 0L)
 		glViewport(0, 0, out->width, out->height);
 	else

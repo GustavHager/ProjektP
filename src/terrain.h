@@ -41,10 +41,16 @@ void generate_world(int width, int height);
 void initWorldgen(int width, int height);
 GLfloat get_height(int x, int z, int width, int height);
 void displace_terrain(int width, int height,double displacement);
+int get_index(int x, int z);
 
 void post_process_terrain();
 
 TextureData generateColormap(void);
+
+GLfloat waterLevel;
+GLfloat sandLevel;
+GLfloat grassLevel;
+GLfloat snowLevel;
 
 
 #endif

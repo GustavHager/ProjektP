@@ -198,7 +198,7 @@ void midplace_generate(int width, int height){
     heightmap[get_index(width-1, height-1)] = random_number(range);
     heightmap[get_index(0,height-1)] = random_number(range);
 
-    double iterRange = width/2.2;
+    double iterRange = width/2;
     int w;
 
     int c=0;
@@ -264,14 +264,10 @@ void displace_terrain(int width, int height,double displacement){
 void initColormap(void){
     colormap = malloc(worldWidth*worldHeight*3*sizeof(GLubyte));
     int i;
-    float randomOffset = random_number(10);
+
 
     for(i=0; i < worldWidth*worldHeight*3; i++){
-        colormap[i] = 100 + randomOffset;
-
-        if(i % 3 == 0){
-            randomOffset = random_number(10);
-        }
+        colormap[i] = 100;
     }
 }
 
@@ -280,40 +276,39 @@ TextureData generateColormap(void){
     int x,z;
     float height;
 
+    printf("sand level %f \n grasslevel %f \n snowlevel %f \n",sandLevel, grassLevel, snowLevel);
+
     for(x=0; x < worldWidth-1; x++){
         for(z=0; z < worldHeight-1; z++){
             height = heightmap[get_index(x,z)];
 
-            float randomOffset = (float)random_number(10);
-            float realHeight = height;
-            height = height + randomOffset;
+            if(height <= waterLevel){
+                colormap[(z*(worldWidth-1)+x)*3 + 0] = 84;
+                colormap[(z*(worldWidth-1)+x)*3 + 1] = 125;
+                colormap[(z*(worldWidth-1)+x)*3 + 2] = 239+random_number(20);
+            }else if(height < sandLevel){
+                colormap[(z*(worldWidth-1)+x)*3 + 0] = 249;
+                colormap[(z*(worldWidth-1)+x)*3 + 1] = 249;
+                colormap[(z*(worldWidth-1)+x)*3 + 2] = 109;
+            }else if(height < grassLevel){
+                colormap[(z*(worldWidth-1)+x)*3 + 0] = 0;
+                colormap[(z*(worldWidth-1)+x)*3 + 1] = 123;
+                colormap[(z*(worldWidth-1)+x)*3 + 2] = 12;
+            }else if(height < snowLevel){
+                float r = random_number(15);
+                colormap[(z*(worldWidth-1)+x)*3 + 0] = 128+r;
+                colormap[(z*(worldWidth-1)+x)*3 + 1] = 128+r;
+                colormap[(z*(worldWidth-1)+x)*3 + 2] = 128+r;
 
-            if (height < 100) { //grass/green stuff
-                colormap[(z*(worldWidth-1)+x)*3 + 0] = 102;
-                colormap[(z*(worldWidth-1)+x)*3 + 1] = 200 + random_number(10);
-                colormap[(z*(worldWidth-1)+x)*3 + 2] = 0;
-            }
-
-            if (height  + random_number(10) > max_point - 100) { //make mountainstops
+            }else{
                 colormap[(z*(worldWidth-1)+x)*3 + 0] = 255;
                 colormap[(z*(worldWidth-1)+x)*3 + 1] = 255;
                 colormap[(z*(worldWidth-1)+x)*3 + 2] = 255;
             }
-
-            if(realHeight <= min_point + 100){ //water
-                colormap[(z*(worldWidth-1)+x)*3 + 0] = 84;
-                colormap[(z*(worldWidth-1)+x)*3 + 1] = 125;
-                colormap[(z*(worldWidth-1)+x)*3 + 2] = 239;
-            }
-
-            if(realHeight <= min_point + 100 + 5 && realHeight > min_point + 100){ //sand
-                colormap[(z*(worldWidth-1)+x)*3 + 0] = 249;
-                colormap[(z*(worldWidth-1)+x)*3 + 1] = 249;
-                colormap[(z*(worldWidth-1)+x)*3 + 2] = 109;
-            }
-
         }
     }
+
+
 
 
 TextureData groundTexture;
@@ -338,7 +333,7 @@ return groundTexture;
 
 Model* GenerateTerrain(){
 
-    int worldSize = 1024*2;
+    int worldSize = 1024*4;
 
 	worldWidth = worldSize+1;
 	worldHeight = worldSize+1;
@@ -348,7 +343,7 @@ Model* GenerateTerrain(){
 	int triangleCount = (worldWidth-1) * (worldHeight-1) * 2;
 	int x, z;
 
-	srand(1956099);
+	srand(time(0));
 
 	vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
 	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
@@ -459,17 +454,32 @@ max_point = 0;
         }
     }
 
+
+    //smooth the world
+    for(x=1; x < worldHeight-1; x++){
+        for(z=1; z < worldHeight-1; z++){
+            heightmap[get_index(x,z)] = (heightmap[get_index(x-1,z)] + heightmap[get_index(x+1,z)] + heightmap[get_index(x,z+1)]+heightmap[get_index(x,z-1)]+heightmap[get_index(x,z)])/5;
+        }
+    }
+
     printf("min is: %f \n", min_point);
     printf("max is: %f \n", max_point);
 
+    waterLevel = 0;
+    sandLevel = waterLevel + 4;
+    grassLevel = max_point*0.4;
+    snowLevel = max_point*0.8;
     //flatten stuff
     for(x=0; x < worldWidth; x++){
         for(z=0; z < worldWidth; z++){
             h = get_height(x,z,worldWidth,worldHeight);
 
-            if(h <= min_point + 100){
-                heightmap[get_index(x,z)] = min_point + 100;
+            if(h <= waterLevel){
+                heightmap[get_index(x,z)] = 0;
+            }else if(h <= grassLevel){
+                heightmap[get_index(x,z)] = heightmap[get_index(x,z)] * sin((heightmap[get_index(x,z)] / (grassLevel)) * 3.1451/2);
             }
+
         }
     }
 

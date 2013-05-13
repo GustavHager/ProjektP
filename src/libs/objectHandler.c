@@ -27,16 +27,12 @@ void getT(objectData *o, GLfloat *matrix){
 void drawObject(objectData *o){
     static GLfloat tMatrix[16];
 
-    printError("start draw object");
     glUseProgram(o->shaderProgram);
 
     getT(o,tMatrix);
 
     glUniformMatrix4fv(glGetUniformLocation(o->shaderProgram, "transMatrix"), 1, GL_TRUE, tMatrix);
     glUniformMatrix4fv(glGetUniformLocation(o->shaderProgram, "rotMatrix"), 1, GL_TRUE, o->rotationMatrix);
-
-
-    printError("object upload trans matrix");
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,o->texture0);
@@ -55,7 +51,7 @@ void drawObject(objectData *o){
 
     int h = glGetUniformLocation(o->shaderProgram, "rotMatrix");
 
-    printError("binding texture to model");
+
     DrawModel(o->m,o->shaderProgram,"inPosition","inNormal","inTexCoord");
-    printError("object draw model");
+
 }

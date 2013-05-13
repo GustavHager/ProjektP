@@ -24,6 +24,7 @@ int main(int argc, char **argv)
 	initKeymapManager();
 	glutTimerFunc(20, &timer, 0);
 
+
 	glutPassiveMotionFunc(mouse);
 
 	glutMainLoop();
